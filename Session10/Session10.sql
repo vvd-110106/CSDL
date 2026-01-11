@@ -1127,3 +1127,35 @@ group by v.username
 order by sum_comment_user desc;
 
 
+-- Bài 9
+drop index idx_user_gender on users;
+create index idx_user_gender on users(gender);
+
+create view view_user_activity as select users.user_id,
+    count(distinct posts.post_id) as total_posts,
+    count(distinct comments.comment_id) as total_comments
+from users left join posts on users.user_id = posts.user_id left join comments
+on users.user_id = comments.user_id group by users.user_id;
+
+select *from view_user_activity;
+
+select users.user_id, users.username,
+    view_user_activity.total_posts,
+    view_user_activity.total_comments
+from view_user_activity join users on view_user_activity.user_id = users.user_id
+where view_user_activity.total_posts > 5
+  and view_user_activity.total_comments > 20
+order by view_user_activity.total_comments desc
+limit 5 offset 0;
+
+-- Bài 10:
+drop view view_user_activity_2;
+create index idx_username on users(username);
+
+create view view_user_activity_2 as
+select users.user_id, count(distinct posts.post_id) as total_posts,
+    count(distinct friends.friend_id) as total_friends
+from users left join posts on users.user_id = posts.user_id
+left join friends on users.user_id = friends.user_id and friends.status = 'accepted' group by users.user_id;
+
+select *from view_user_activity_2;
